@@ -1,0 +1,5 @@
+dn: o=authing
+changetype: add
+objectClass: organization
+objectClass: top
+o: authing

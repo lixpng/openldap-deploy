@@ -1,0 +1,57 @@
+dn: dc=com,o=authing
+dc: com
+objectClass: domain
+
+dn: dc=xp,dc=com,o=authing
+dc: xp
+objectClass: domain
+
+dn: ou=system_users,dc=xp,dc=com,o=authing
+ou: system_users
+objectClass: organizationalUnit
+
+dn: ou=test,dc=xp,dc=com,o=authing
+ou: test
+objectClass: organizationalUnit
+
+dn: cn=user,ou=test,dc=xp,dc=com,o=authing
+cn: user
+sn: user
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+userpassword: user
+
+dn: cn=system_user,ou=system_users,dc=xp,dc=com,o=authing
+cn: system_user
+sn: system_user
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+userpassword: admin
+
+
+dn: dc=hy,dc=xp,dc=com,o=authing
+dc: hy
+objectClass: domain
+
+dn: ou=test,dc=hy,dc=xp,dc=com,o=authing
+ou: test
+objectClass: organizationalUnit
+
+dn: ou=system_users,dc=hy,dc=xp,dc=com,o=authing
+ou: system_users
+objectClass: organizationalUnit
+
+dn: cn=system_user,ou=system_users,dc=hy,dc=xp,dc=com,o=authing
+cn: system_user
+sn: system_user
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+userpassword: admin
+
+
+dn: dc=hh,dc=com,o=authing
+dc: hh
+objectClass: domain

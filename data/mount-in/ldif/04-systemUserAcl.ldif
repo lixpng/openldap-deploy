@@ -1,0 +1,21 @@
+dn: olcDatabase={1}mdb,cn=config
+changetype: modify
+replace: olcAccess
+olcAccess: to attrs=userPassword
+  by dn="cn=admin,o=authing" write
+  by dn.regex="^cn=system_user,ou=system_users" write
+  by anonymous auth
+  by self write
+  by * none
+olcAccess: to dn.regex="^cn=system_user,ou=system_users"
+  by dn="cn=admin,o=authing" write
+  by * read
+olcAccess: to dn.regex="dc=([^,]+),dc=([^,]+),o=authing$"
+  by dn.regex="cn=system_user,ou=system_users,dc=$1,dc=$2,o=authing" write 
+  by dn.regex="dc=$1,dc=$2,o=authing$" read
+  by * none
+olcAccess: to *
+  by dn="cn=admin,o=authing" write
+  by anonymous auth
+  by self write
+  by * read

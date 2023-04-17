@@ -1,0 +1,78 @@
+version: '2'
+services:
+  openldap:
+    image: osixia/openldap:1.5.0
+    container_name: openldap
+    environment:
+      # 日志等级
+      LDAP_LOG_LEVEL: '256'
+      # 组织
+      LDAP_ORGANISATION: 'authing'
+      # 域名
+      LDAP_DOMAIN: 'authing'
+      # Base DN
+      LDAP_BASE_DN: 'o=authing'
+      # Root DN
+      LDAP_SUFFIX: 'o=authing'
+      # 管理员密码
+      LDAP_ADMIN_PASSWORD: 'admin'
+      # cn=admin,cn=config 的密码
+      LDAP_CONFIG_PASSWORD: 'config'
+      # 启用只读用户
+      LDAP_READONLY_USER: 'false'
+      #LDAP_READONLY_USER_USERNAME: "readonly"
+      #LDAP_READONLY_USER_PASSWORD: "readonly"
+      LDAP_RFC2307BIS_SCHEMA: 'false'
+      # 数据库类型
+      LDAP_BACKEND: 'mdb'
+      # 开始 TLS
+      LDAP_TLS: 'true'
+      LDAP_TLS_CRT_FILENAME: 'ldap.crt'
+      LDAP_TLS_KEY_FILENAME: 'ldap.key'
+      LDAP_TLS_DH_PARAM_FILENAME: 'dhparam.pem'
+      LDAP_TLS_CA_CRT_FILENAME: 'ldapca.pem'
+      LDAP_TLS_ENFORCE: 'false'
+      LDAP_TLS_CIPHER_SUITE: 'SECURE256:+SECURE128:-VERS-TLS-ALL:+VERS-TLS1.2:-RSA:-DHE-DSS:-CAMELLIA-128-CBC:-CAMELLIA-256-CBC'
+      # 是否校验 LDAPS 客户端证书
+      # 当 LDAP_TLS_VERIFY_CLIENT 设置为 "never" 时，OpenLDAP 会始终接受来自客户端的 TLS 连接，而不进行客户端证书的验证。这意味着任何人都可以使用任何证书连接到 OpenLDAP，因此建议仅在测试或临时环境中使用。
+      # 当 LDAP_TLS_VERIFY_CLIENT 设置为 "allow" 时，OpenLDAP 允许客户端提交证书，但不会强制进行验证。在这种情况下，如果客户端提供了证书，则该证书将被用于加密和认证，但是如果证书无效或未知，则仍然允许连接。这种模式通常用于测试或向现有部署添加 TLS 支持，但并不要求客户端证书的强制验证。
+      # 当 LDAP_TLS_VERIFY_CLIENT 设置为 "try" 时，OpenLDAP 会尝试验证客户端的证书，但是如果客户端未提供证书或证书无效，则仍然允许连接。这种模式通常用于加密连接，但是在有些情况下，客户端可能没有可用的证书，因此需要容错性。
+      # 当 LDAP_TLS_VERIFY_CLIENT 设置为 "demand" 时，OpenLDAP 要求客户端提交有效的证书，否则连接将被拒绝。这种模式通常用于高安全性的部署，其中只有经过身份验证的客户端才能访问 OpenLDAP 服务。
+      # 需要注意的是，要使用 LDAP_TLS_VERIFY_CLIENT 选项进行客户端证书验证，还需要提供相应的 CA 证书，并将其配置为 OpenLDAP 的信任证书。否则，OpenLDAP 将无法验证客户端提交的证书。
+      # 客户端证书配置路径查看 /etc/ldap/ldap.conf
+      LDAP_TLS_VERIFY_CLIENT: 'try'
+      LDAP_REPLICATION: 'true'
+      LDAP_REPLICATION_CONFIG_SYNCPROV: 'binddn="cn=admin,cn=config" bindmethod=simple credentials="$$LDAP_CONFIG_PASSWORD" searchbase="cn=config" type=refreshAndPersist retry="60 +" timeout=3 starttls=try'
+      LDAP_REPLICATION_DB_SYNCPROV: 'binddn="cn=admin,$$LDAP_BASE_DN" bindmethod=simple credentials="$$LDAP_ADMIN_PASSWORD" searchbase="cn=accesslog" type=refreshAndPersist interval=00:00:00:10 retry="60 +" timeout=3 starttls=try'
+      LDAP_REPLICATION_HOSTS: "#PYTHON2BASH:['ldap://ldap-server.authing']"
+      KEEP_EXISTING_CONFIG: 'false'
+      LDAP_REMOVE_CONFIG_AFTER_SETUP: 'false'
+      LDAP_SSL_HELPER_PREFIX: 'ldap'
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./data/mount-out/var/lib/ldap:/var/lib/ldap
+      - ./data/mount-out/etc/ldap/slapd.d:/etc/ldap/slapd.d
+      - ./data/mount-out/log:/var/log/slapd
+      - ./data/mount-in/certs/:/container/service/slapd/assets/certs/
+      - ./data/mount-in/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom
+      - ./data/mount-in/schema:/container/service/slapd/assets/config/bootstrap/schema/custom
+
+    ports:
+      - '389:389'
+      - '636:636'
+    # For replication to work correctly, domainname and hostname must be
+    # set correctly so that "hostname"."domainname" equates to the
+    # fully-qualified domain name for the host.
+    domainname: 'authing'
+    hostname: 'ldap-server'
+  phpldapadmin:
+    image: osixia/phpldapadmin:latest
+    container_name: phpldapadmin
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: 'openldap'
+      PHPLDAPADMIN_HTTPS: 'false'
+    ports:
+      - '8080:80'
+    depends_on:
+      - openldap
