@@ -2,7 +2,7 @@
 # 注意填写 Common Name (e.g. server FQDN or YOUR name) [] 时要是 LDAP 访问域名
 # 临时目录
 mkdir .cert_tmp
-cd tmp
+cd .cert_tmp
 # 创建根密钥
 openssl genrsa -out ldapca.key 2048
 # 创建自签名根证书
