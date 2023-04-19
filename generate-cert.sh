@@ -14,8 +14,9 @@ openssl req -new -key ldap.key -out ldap.csr
 # 使用自定义根CA签署证书签名请求
 openssl x509 -req -in ldap.csr -CA ldapca.pem -CAkey ldapca.key -CAcreateserial -out ldap.crt -days 36600 -sha256
 # 拷贝
-cp ldap.{crt,key} ldapca.pem /workspace/coder/openldap-docker-compose/data/mount-in/certs/
+cp ldap.{crt,key} ldapca.pem ../data/mount-in/certs/
 # 删除临时目录
+cd ..
 rm -rf .cert_tmp
 
 
